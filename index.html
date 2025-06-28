@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đọc Suy Nghĩ Bằng AI Lượng Tử</title>
+    <title>NeuroScan AI - Đọc Suy Nghĩ Bằng AI Lượng Tử</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
@@ -85,8 +85,7 @@
         }
 
         .thought-input {
-          
-            width: 100%;
+                 width: 100%;
             height: 60px;
             background: rgba(0, 0, 0, 0.8);
             border: 2px solid #00ff00;
@@ -108,6 +107,7 @@
         }
 
         .scan-button {
+            width: 100%;
             margin-top: 30px;
             padding: 15px 40px;
             background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00);
@@ -122,7 +122,6 @@
             box-shadow: 0 0 30px rgba(255, 128, 0, 0.6);
             transition: all 0.3s ease;
             position: relative;
-            min-width: 100%;
             overflow: hidden;
         }
 
@@ -207,7 +206,7 @@
         }
 
         .progress-bar {
-            width: 400px;
+            width: 100%;
             height: 20px;
             background: rgba(0, 0, 0, 0.8);
             border: 2px solid #00ff00;
@@ -220,7 +219,7 @@
             height: 100%;
             background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
             width: 0%;
-            animation: fillProgress 5s ease-in-out forwards;
+            animation: fillProgress 15s ease-in-out forwards;
         }
 
         .result-section {
@@ -318,10 +317,13 @@
 
         @keyframes fillProgress {
             0% { width: 0%; }
-            20% { width: 25%; }
+            10% { width: 15%; }
+            25% { width: 35%; }
             40% { width: 50%; }
-            60% { width: 75%; }
-            80% { width: 90%; }
+            55% { width: 65%; }
+            70% { width: 78%; }
+            85% { width: 92%; }
+            95% { width: 98%; }
             100% { width: 100%; }
         }
 
@@ -367,7 +369,7 @@
             <div class="input-label">💭 NHẬP SUY NGHĨ CỦA BẠN UYÊN:</div>
             <input type="text" class="thought-input" id="thoughtInput" placeholder="Hãy nghĩ về điều gì đó...">
             <br>
-            <button  class="scan-button" onclick="startScanning()">
+            <button class="scan-button" onclick="startScanning()">
                 🔬 QUÉT NÃO NGAY
             </button>
         </div>
@@ -449,12 +451,18 @@
         const scanningTexts = [
             "🔍 Đang kết nối với AI Lượng Tử...",
             "⚡ Khởi động máy quét não...",
-            "🧬 Phân tích sóng não...",
+            "🌐 Kết nối với server NASA...",
+            "🧬 Phân tích sóng não Alpha, Beta, Gamma...",
             "💾 Tải dữ liệu vào điện toán đám mây...",
-            "🔬 Giải mã tín hiệu thần kinh...",
+            "🔬 Giải mã 1.2 tỷ tín hiệu thần kinh...",
+            "🧠 Quét vùng não tiền trán...",
+            "⚡ Phân tích hoạt động Hippocampus...",
             "🌐 Đồng bộ với mạng AI toàn cầu...",
-            "⚠️ CẢNH BÁO: Phát hiện hoạt động não bộ!",
-            "🎯 Trích xuất suy nghĩ thành công!"
+            "🔥 Xử lý bằng siêu máy tính lượng tử...",
+            "⚠️ CẢNH BÁO: Phát hiện hoạt động não bộ mạnh!",
+            "🚨 Đang truy cập suy nghĩ sâu...",
+            "💡 Giải mã thành công 97.3%...",
+            "🎯 Hoàn tất quá trình đọc não!"
         ];
 
         function startScanning() {
@@ -473,18 +481,29 @@
                 if (textIndex >= scanningTexts.length) {
                     clearInterval(textInterval);
                 }
-            }, 700);
+            }, 1200); // Tăng từ 700ms lên 1200ms
 
-            // Add glitch effect
+            // Add glitch effect multiple times
             setTimeout(() => {
                 document.body.classList.add('glitch');
-            }, 2000);
+                setTimeout(() => document.body.classList.remove('glitch'), 500);
+            }, 3000);
 
             setTimeout(() => {
-                document.body.classList.remove('glitch');
+                document.body.classList.add('glitch');
+                setTimeout(() => document.body.classList.remove('glitch'), 800);
+            }, 8000);
+
+            setTimeout(() => {
+                document.body.classList.add('glitch');
+                setTimeout(() => document.body.classList.remove('glitch'), 300);
+            }, 12000);
+
+            // Tăng thời gian tổng từ 6000ms lên 16000ms (16 giây)
+            setTimeout(() => {
                 document.getElementById('scanningOverlay').style.display = 'none';
                 showResult(thought);
-            }, 6000);
+            }, 16000);
         }
 
         function showResult(thought) {
