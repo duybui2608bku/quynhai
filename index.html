@@ -1,547 +1,656 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroScan AI - Đọc Suy Nghĩ Bằng AI Lượng Tử</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phân Tích Dữ Liệu Quảng Cáo Facebook</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Orbitron', monospace;
-            background: #000;
-            color: #00ff00;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        .main-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #ff0000, #00ff00, #0080ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #ff4444;
-            text-shadow: 0 0 10px #ff4444;
-            animation: pulse 1.5s infinite;
-        }
-
-        .input-section {
-            background: rgba(0, 20, 40, 0.9);
-            border: 2px solid #00ff00;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.3);
-            backdrop-filter: blur(10px);
-            animation: borderGlow 3s ease-in-out infinite;
-        }
-
-        .input-label {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-align: center;
-            color: #00ccff;
-            text-shadow: 0 0 10px #00ccff;
-        }
-
-        .thought-input {
-                 width: 100%;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            color: #00ff00;
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            padding: 15px;
-            text-align: center;
-            outline: none;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .thought-input:focus {
-            border-color: #ff0080;
-            box-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
-            color: #ff0080;
-        }
-
-        .scan-button {
-            width: 100%;
-            margin-top: 30px;
-            padding: 15px 40px;
-            background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00);
-            border: none;
-            border-radius: 25px;
-            color: #000;
-            font-family: 'Orbitron', monospace;
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 30px rgba(255, 128, 0, 0.6);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .scan-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 50px rgba(255, 128, 0, 0.8);
-        }
-
-        .scan-button::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transform: rotate(45deg);
-            transition: all 0.6s;
-            opacity: 0;
-        }
-
-        .scan-button:hover::before {
-            animation: shine 0.6s ease-in-out;
-        }
-
-        .scanning-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .scanning-content {
-            text-align: center;
-            animation: scanPulse 2s ease-in-out infinite;
-        }
-
-        .scanning-title {
-            font-size: 2.5rem;
-            color: #ff0000;
-            text-shadow: 0 0 20px #ff0000;
-            margin-bottom: 30px;
-            animation: dangerGlow 1s ease-in-out infinite alternate;
-        }
-
-        .scanning-gif {
-            width: 300px;
-            height: 300px;
-            border: 3px solid #00ff00;
-            border-radius: 50%;
-            background: radial-gradient(circle, #001100, #003300);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 30px auto;
-            animation: rotate 2s linear infinite;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .radar-sweep {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 0, 0.8) 30deg, transparent 60deg);
-            animation: radarSweep 2s linear infinite;
-        }
-
-        .scanning-text {
-            font-size: 1.5rem;
-            color: #ffff00;
-            text-shadow: 0 0 10px #ffff00;
-            margin: 20px 0;
-            animation: typing 3s steps(30) infinite;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 30px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
-            width: 0%;
-            animation: fillProgress 15s ease-in-out forwards;
-        }
-
-        .result-section {
-            display: none;
-            text-align: center;
-            background: rgba(20, 0, 0, 0.9);
-            border: 3px solid #ff0000;
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 50px;
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
-            animation: resultAppear 1s ease-out;
-        }
-
-        .result-title {
-            font-size: 2rem;
-            color: #ff0000;
-            text-shadow: 0 0 20px #ff0000;
-            margin-bottom: 30px;
-        }
-
-        .result-text {
-            font-size: 1.5rem;
-            color: #00ff00;
-            text-shadow: 0 0 15px #00ff00;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #00ff00;
-            animation: textGlow 2s ease-in-out infinite alternate;
-        }
-
-        .warning-text {
-            font-size: 1rem;
-            color: #ff8800;
-            margin-top: 20px;
-            animation: warning 1s ease-in-out infinite;
-        }
-
-        .matrix-rain {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; }
-            100% { text-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00, 0 0 80px #00ff00; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        @keyframes borderGlow {
-            0%, 100% { border-color: #00ff00; box-shadow: 0 0 50px rgba(0, 255, 0, 0.3); }
-            50% { border-color: #00ccff; box-shadow: 0 0 50px rgba(0, 204, 255, 0.3); }
-        }
-
-        @keyframes shine {
-            0% { left: -50%; opacity: 0; }
-            50% { opacity: 1; }
-            100% { left: 150%; opacity: 0; }
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes radarSweep {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes scanPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        @keyframes dangerGlow {
-            0% { color: #ff0000; text-shadow: 0 0 20px #ff0000; }
-            100% { color: #ff4444; text-shadow: 0 0 40px #ff0000, 0 0 60px #ff0000; }
-        }
-
-        @keyframes typing {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes fillProgress {
-            0% { width: 0%; }
-            10% { width: 15%; }
-            25% { width: 35%; }
-            40% { width: 50%; }
-            55% { width: 65%; }
-            70% { width: 78%; }
-            85% { width: 92%; }
-            95% { width: 98%; }
-            100% { width: 100%; }
-        }
-
-        @keyframes resultAppear {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes textGlow {
-            0% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.3); }
-            100% { box-shadow: 0 0 40px rgba(0, 255, 0, 0.6); }
-        }
-
-        @keyframes warning {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .glitch {
-            animation: glitch 0.3s infinite;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
-        }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f4f8; /* Nền nhẹ nhàng, hiện đại */
+        padding: 40px;
+        color: #333; /* Màu chữ tối để dễ đọc */
+      }
+      .container {
+        max-width: 1400px; /* Tăng chiều rộng container để biểu đồ lớn hơn */
+      }
+      .card {
+        margin-bottom: 40px; /* Tăng khoảng cách giữa các card */
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* Bóng nhẹ, hiện đại */
+        border-radius: 16px; /* Bo góc mượt mà hơn */
+        border: none; /* Bỏ border mặc định */
+        background: linear-gradient(135deg, #ffffff, #f9fbfc); /* Gradient nhẹ cho card */
+      }
+      .card-header {
+        background: linear-gradient(135deg, #007bff, #00c6ff); /* Gradient hiện đại cho header */
+        color: white;
+        font-weight: bold;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        padding: 20px; /* Tăng padding cho header */
+        text-align: center; /* Căn giữa tiêu đề */
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #007bff, #00c6ff); /* Gradient cho nút */
+        border: none;
+        padding: 14px 28px; /* Làm nút lớn hơn */
+        font-size: 1.2rem;
+        border-radius: 8px; /* Bo góc nút */
+        transition: transform 0.3s ease; /* Hiệu ứng hover */
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #0056b3, #0099cc);
+        transform: translateY(-2px); /* Nâng nút lên khi hover */
+      }
+      canvas {
+        height: 500px !important; /* Tăng chiều cao biểu đồ để lớn hơn và rõ ràng hơn */
+        border-radius: 12px; /* Bo góc biểu đồ */
+      }
+      #aiAnalysis {
+        white-space: pre-wrap;
+        background-color: #fff;
+        padding: 25px; /* Tăng padding */
+        border-radius: 16px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      }
+      .form-label {
+        font-weight: bold;
+        color: #007bff; /* Màu label nổi bật */
+      }
+      .text-center.mb-4 {
+        margin-top: 30px;
+      }
+      .chart-container {
+        overflow-x: auto;
+        padding: 10px;
+        background: #ffffff; /* Nền trắng cho container biểu đồ */
+        border-radius: 12px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); /* Bóng inset nhẹ */
+      }
+      .sub-card {
+        margin-bottom: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      .sub-card .card-header {
+        background: linear-gradient(135deg, #28a745, #34c759); /* Gradient xanh cho sub-header hiệu quả */
+      }
+      .sub-card.card-low .card-header {
+        background: linear-gradient(135deg, #dc3545, #fd7e14); /* Gradient đỏ cam cho sub-header không hiệu quả */
+      }
+      h1 {
+        color: #007bff;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Bóng chữ nhẹ */
+      }
+      select.form-select, input.form-control {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.3s ease;
+      }
+      select.form-select:focus, input.form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+      }
+      .sort-select {
+        margin-bottom: 15px;
+        width: 200px;
+      }
     </style>
-</head>
-<body>
-    <div id="canvas-container"></div>
-    
-    <div class="main-container">
-        <div class="header">
-            <h1>🧠 ĐỌC VỊ THU UYÊN 🧠</h1>
-            <p class="subtitle">⚠️ CÔNG NGHỆ ĐỌC SUY NGHĨ NGUY HIỂM ⚠️</p>
-        </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center mb-5">Phân Tích Dữ Liệu Quảng Cáo Facebook</h1>
+      <!-- Tăng margin bottom cho tiêu đề -->
 
-        <div class="input-section">
-            <div class="input-label">💭 NHẬP SUY NGHĨ CỦA BẠN UYÊN:</div>
-            <input type="text" class="thought-input" id="thoughtInput" placeholder="Hãy nghĩ về điều gì đó...">
-            <br>
-            <button class="scan-button" onclick="startScanning()">
-                🔬 QUÉT NÃO NGAY
-            </button>
-        </div>
-
-        <div class="result-section" id="resultSection">
-            <div class="result-title">🎯 KẾT QUẢ QUÉT NÃO:</div>
-            <div class="result-text" id="resultText"></div>
-            <div class="warning-text">⚠️ Dữ liệu đã được lưu vào hệ thống AI Lượng Tử ⚠️</div>
-        </div>
-    </div>
-
-    <div class="scanning-overlay" id="scanningOverlay">
-        <div class="scanning-content">
-            <div class="scanning-title glitch">🚨 ĐANG QUÉT NÃO... 🚨</div>
-            <div class="scanning-gif">
-                <div class="radar-sweep"></div>
-                <div style="font-size: 4rem;">🧠</div>
+      <div class="row mb-4">
+        <!-- Thêm margin bottom cho row đầu -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <label for="fileInput" class="form-label">Chọn file CSV:</label>
+              <input
+                type="file"
+                class="form-control"
+                id="fileInput"
+                accept=".csv"
+              />
             </div>
-            <div class="scanning-text" id="scanningText">Đang kết nối với AI Lượng Tử...</div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
+          </div>
         </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <label for="openaiToken" class="form-label"
+                >Token OpenAI (tùy chọn):</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="openaiToken"
+                placeholder="Nhập token OpenAI nếu muốn phân tích AI"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <label for="currency" class="form-label">Đơn vị tiền tệ:</label>
+              <select class="form-select" id="currency">
+                <option value="VND" selected>VND</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mb-5">
+        <!-- Tăng margin bottom cho nút -->
+        <button class="btn btn-primary btn-lg" onclick="analyzeData()">
+          Phân Tích Dữ Liệu
+        </button>
+      </div>
+
+      <div id="charts">
+        <div class="card">
+          <div class="card-header">
+            <h2>Biểu Đồ 1: Chi Phí Và Chi Phí Trên Kết Quả Theo Độ Tuổi</h2>
+          </div>
+          <div class="card-body"><canvas id="chart1"></canvas></div>
+        </div>
+
+        <div class="card" id="chart2-container">
+          <div class="card-header">
+            <h2>
+              Biểu Đồ 2: Chiến Dịch Hiệu Quả (Thu Hút Người Xem Video) Theo Độ
+              Tuổi
+            </h2>
+          </div>
+          <div class="card-body" id="chart2-body"></div>
+        </div>
+
+        <div class="card" id="chart3-container">
+          <div class="card-header">
+            <h2>
+              Biểu Đồ 3: Chiến Dịch Không Hiệu Quả (Kém Thu Hút Video) Theo Độ
+              Tuổi
+            </h2>
+          </div>
+          <div class="card-body" id="chart3-body"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>
+              Biểu Đồ 4: So Sánh Độ Tuổi – Người Tiếp Cận – Lượt Hiển Thị – Tần
+              Suất
+            </h2>
+          </div>
+          <div class="card-body"><canvas id="chart4"></canvas></div>
+        </div>
+      </div>
+
+      <div id="aiAnalysis" class="card mt-4">
+        <div class="card-header"><h2>Phân Tích AI</h2></div>
+        <div class="card-body"></div>
+      </div>
     </div>
 
     <script>
-        // Three.js Background
-        let scene, camera, renderer, particles;
-        
-        function initThreeJS() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
+      let chart1, chart4;
+      let subCharts2 = [];
+      let subCharts3 = [];
+      let groupData2 = [];
+      let groupData3 = [];
+      const exchangeRate = 26155; // 1 USD = 26155 VND
 
-            // Create particle system
-            const geometry = new THREE.BufferGeometry();
-            const vertices = [];
-            const colors = [];
+      function analyzeData() {
+          const fileInput = document.getElementById('fileInput');
+          const currency = document.getElementById('currency').value;
+          const token = document.getElementById('openaiToken').value.trim();
+          const aiDiv = document.getElementById('aiAnalysis').querySelector('.card-body');
+          aiDiv.innerHTML = '';
 
-            for (let i = 0; i < 5000; i++) {
-                vertices.push(
-                    (Math.random() - 0.5) * 2000,
-                    (Math.random() - 0.5) * 2000,
-                    (Math.random() - 0.5) * 2000
-                );
-                
-                const color = new THREE.Color();
-                color.setHSL(Math.random() * 0.3 + 0.3, 1, 0.5);
-                colors.push(color.r, color.g, color.b);
+          if (!fileInput.files.length) {
+              alert('Vui lòng chọn file CSV.');
+              return;
+          }
+
+          const file = fileInput.files[0];
+          Papa.parse(file, {
+              header: true,
+              skipEmptyLines: true,
+              complete: function(results) {
+                  let data = results.data;
+                  // Convert money columns if USD selected (data is in VND, convert to USD by dividing)
+                  if (currency === 'USD') {
+                      data = data.map(row => {
+                          row['Số tiền đã chi tiêu (VND)'] = (parseFloat(row['Số tiền đã chi tiêu (VND)']) / exchangeRate).toFixed(2);
+                          row['Chi phí trên mỗi kết quả'] = (parseFloat(row['Chi phí trên mỗi kết quả']) / exchangeRate).toFixed(2);
+                          row['CPC (Tất cả)'] = (parseFloat(row['CPC (Tất cả)']) / exchangeRate).toFixed(2);
+                          return row;
+                      });
+                  }
+
+                  // Process for charts
+                  renderChart1(data, currency);
+                  renderChart2(data);
+                  renderChart3(data);
+                  renderChart4(data);
+
+                  // AI analysis if token provided
+                  if (token) {
+                      performAIAnalysis(data, token, currency, aiDiv);
+                  }
+              }
+          });
+      }
+
+      function renderChart1(data, currency) {
+          // Group by Độ tuổi
+          const ageGroups = {};
+          data.forEach(row => {
+              const age = row['Độ tuổi'] || 'Unknown';
+              const spend = parseFloat(row['Số tiền đã chi tiêu (VND)']) || 0;
+              const costPerResult = parseFloat(row['Chi phí trên mỗi kết quả']) || 0;
+
+              if (!ageGroups[age]) {
+                  ageGroups[age] = { spend: 0, costs: [] };
+              }
+              ageGroups[age].spend += spend;
+              if (costPerResult > 0) ageGroups[age].costs.push(costPerResult);
+          });
+
+          const labels = Object.keys(ageGroups);
+          const spends = labels.map(age => ageGroups[age].spend);
+          const avgCostPerResult = labels.map(age => {
+              const costs = ageGroups[age].costs;
+              return costs.length > 0 ? (costs.reduce((a, b) => a + b, 0) / costs.length).toFixed(2) : 0;
+          });
+
+          const ctx = document.getElementById('chart1').getContext('2d');
+          if (chart1) chart1.destroy();
+          chart1 = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: labels,
+                  datasets: [
+                      { label: `Số Tiền Đã Chi Tiêu (${currency})`, data: spends, backgroundColor: 'rgba(75, 192, 192, 0.6)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 },
+                      { label: `Chi Phí Trung Bình / Kết Quả (${currency})`, data: avgCostPerResult, backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }
+                  ]
+              },
+              options: {
+                  scales: { y: { beginAtZero: true } },
+                  plugins: {
+                      legend: { position: 'top' }, // Đặt legend lên trên để rõ ràng hơn
+                      tooltip: {
+                          callbacks: {
+                              label: function(context) {
+                                  const value = Number(context.parsed.y);
+                                  const formattedValue = currency === 'VND' ? value.toLocaleString('vi-VN') : value.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                                  return `${context.dataset.label}: ${formattedValue} ${currency}`;
+                              }
+                          }
+                      }
+                  },
+                  responsive: true,
+                  maintainAspectRatio: false // Cho phép biểu đồ điều chỉnh kích thước tự do
+              }
+          });
+      }
+
+      function createChart(ctx, labels, views25Data, ratio3sData, isResponsive = false) {
+        return new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: labels,
+                      datasets: [
+                          { label: 'Lượt Phát 25% Thời Lượng Video', data: views25Data, backgroundColor: 'rgba(40, 167, 69, 0.6)', borderColor: 'rgba(40, 167, 69, 1)', borderWidth: 1 },
+                          { label: 'Tỷ Lệ Lượt Phát 3 Giây (%)', data: ratio3sData, backgroundColor: 'rgba(23, 162, 184, 0.6)', borderColor: 'rgba(23, 162, 184, 1)', borderWidth: 1 }
+                      ]
+                  },
+                  options: {
+                    scales: {
+                      y: { beginAtZero: true },
+                      x: {
+                        ticks: {
+                          autoSkip: false,
+                          maxRotation: 90,
+                          minRotation: 90
+                        }
+                      }
+                    },
+                    plugins: {
+                      legend: { position: 'top' },
+                    },
+                    responsive: isResponsive,
+                    maintainAspectRatio: false
+                  }
+              });
+      }
+
+      function renderChart2(data) {
+          // Clear previous subcharts
+          subCharts2.forEach(chart => chart.destroy());
+          subCharts2 = [];
+          const body = document.getElementById('chart2-body');
+          body.innerHTML = '';
+
+          // Calculate means for filtering
+          const views25 = data.map(row => parseFloat(row['Lượt phát 25% thời lượng video']) || 0);
+          const ratio3s = data.map(row => parseFloat(row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) || 0);
+          const meanViews25 = views25.reduce((a, b) => a + b, 0) / views25.length;
+          const meanRatio3s = ratio3s.reduce((a, b) => a + b, 0) / ratio3s.length;
+
+          // Filter high: above mean in both
+          const highData = data.filter(row => {
+              const v25 = parseFloat(row['Lượt phát 25% thời lượng video']) || 0;
+              const r3s = parseFloat(row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) || 0;
+              return v25 > meanViews25 && r3s > meanRatio3s;
+          });
+
+          // Group by Độ tuổi
+          const ageGroups = {};
+          highData.forEach(row => {
+              const age = row['Độ tuổi'] || 'Unknown';
+              if (!ageGroups[age]) {
+                  ageGroups[age] = [];
+              }
+              ageGroups[age].push(row);
+          });
+
+          groupData2 = ageGroups;
+
+          Object.keys(ageGroups).forEach((age, index) => {
+              const subCard = document.createElement('div');
+              subCard.className = 'sub-card card';
+              const subHeader = document.createElement('div');
+              subHeader.className = 'card-header';
+              subHeader.innerHTML = `<h3>Độ Tuổi: ${age}</h3>`;
+              const subBody = document.createElement('div');
+              subBody.className = 'card-body';
+              const sortSelect = document.createElement('select');
+              sortSelect.className = 'sort-select form-select';
+              sortSelect.innerHTML = `
+                <option value="id">Sort by ID</option>
+                <option value="views25-desc">Sort by 25% Views Desc</option>
+                <option value="ratio3s-desc">Sort by 3s Ratio Desc</option>
+              `;
+              sortSelect.onchange = (e) => sortAndRenderChart2(index, e.target.value, age);
+              subBody.appendChild(sortSelect);
+              const chartContainer = document.createElement('div');
+              chartContainer.className = 'chart-container';
+              const canvas = document.createElement('canvas');
+              canvas.id = `chart2-sub-${index}`;
+              chartContainer.appendChild(canvas);
+              subBody.appendChild(chartContainer);
+              subCard.appendChild(subHeader);
+              subCard.appendChild(subBody);
+              body.appendChild(subCard);
+
+              sortAndRenderChart2(index, 'id', age);
+          });
+      }
+
+      function sortAndRenderChart2(index, sortType, age) {
+        let groupData = groupData2[age];
+        let sortedData = [...groupData];
+
+        if (sortType === 'views25-desc') {
+          sortedData.sort((a, b) => parseFloat(b['Lượt phát 25% thời lượng video']) - parseFloat(a['Lượt phát 25% thời lượng video']));
+        } else if (sortType === 'ratio3s-desc') {
+          sortedData.sort((a, b) => parseFloat(b['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) - parseFloat(a['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']));
+        } // 'id' is default, no sort or sort by ID if needed
+
+        const labels = sortedData.map(row => row['ID chiến dịch']);
+        const views25Data = sortedData.map(row => parseFloat(row['Lượt phát 25% thời lượng video']) || 0);
+        const ratio3sData = sortedData.map(row => parseFloat(row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) || 0);
+
+        const canvas = document.getElementById(`chart2-sub-${index}`);
+        const minWidthPerLabel = 100;
+        const chartWidth = labels.length * minWidthPerLabel + 100;
+        canvas.width = chartWidth;
+        canvas.height = 500;
+        canvas.style.width = chartWidth + 'px';
+        canvas.style.height = '500px';
+
+        const ctx = canvas.getContext('2d');
+        if (subCharts2[index]) subCharts2[index].destroy();
+        subCharts2[index] = createChart(ctx, labels, views25Data, ratio3sData, false);
+
+        // Add click event for copying labels
+        canvas.addEventListener('click', function(event) {
+          const chartArea = subCharts2[index].chartArea;
+          const rect = canvas.getBoundingClientRect();
+          const clickX = event.clientX - rect.left;
+          const clickY = event.clientY - rect.top;
+          if (clickY > chartArea.bottom) {
+            const xScale = subCharts2[index].scales.x;
+            const ticks = xScale.ticks;
+            for (let i = 0; i < ticks.length; i++) {
+              let left = xScale.getPixelForTick(i - 0.5);
+              let right = xScale.getPixelForTick(i + 0.5);
+              if (isNaN(left)) left = xScale.left;
+              if (isNaN(right)) right = xScale.right;
+              if (clickX >= left && clickX <= right) {
+                const label = ticks[i].label;
+                navigator.clipboard.writeText(label).then(() => {
+                  alert('Đã copy ID chiến dịch: ' + label);
+                });
+                break;
+              }
             }
+          }
+        });
+      }
 
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      function renderChart3(data) {
+          // Clear previous subcharts
+          subCharts3.forEach(chart => chart.destroy());
+          subCharts3 = [];
+          const body = document.getElementById('chart3-body');
+          body.innerHTML = '';
 
-            const material = new THREE.PointsMaterial({
-                size: 3,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8
-            });
+          // Calculate means for filtering
+          const views25 = data.map(row => parseFloat(row['Lượt phát 25% thời lượng video']) || 0);
+          const ratio3s = data.map(row => parseFloat(row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) || 0);
+          const meanViews25 = views25.reduce((a, b) => a + b, 0) / views25.length;
+          const meanRatio3s = ratio3s.reduce((a, b) => a + b, 0) / ratio3s.length;
 
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-            camera.position.z = 1000;
+          // Filter low: below mean in both
+          const lowData = data.filter(row => {
+              const v25 = parseFloat(row['Lượt phát 25% thời lượng video']) || 0;
+              const r3s = parseFloat(row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) || 0;
+              return v25 < meanViews25 && r3s < meanRatio3s;
+          });
 
-            animate();
-        }
+          // Group by Độ tuổi
+          const ageGroups = {};
+          lowData.forEach(row => {
+              const age = row['Độ tuổi'] || 'Unknown';
+              if (!ageGroups[age]) {
+                  ageGroups[age] = [];
+              }
+              ageGroups[age].push(row);
+          });
 
-        function animate() {
-            requestAnimationFrame(animate);
-            particles.rotation.x += 0.001;
-            particles.rotation.y += 0.002;
-            renderer.render(scene, camera);
-        }
+          groupData3 = ageGroups;
 
-        // Scanning process
-        const scanningTexts = [
-            "🔍 Đang kết nối với AI Lượng Tử...",
-            "⚡ Khởi động máy quét não...",
-            "🌐 Kết nối với server NASA...",
-            "🧬 Phân tích sóng não Alpha, Beta, Gamma...",
-            "💾 Tải dữ liệu vào điện toán đám mây...",
-            "🔬 Giải mã 1.2 tỷ tín hiệu thần kinh...",
-            "🧠 Quét vùng não tiền trán...",
-            "⚡ Phân tích hoạt động Hippocampus...",
-            "🌐 Đồng bộ với mạng AI toàn cầu...",
-            "🔥 Xử lý bằng siêu máy tính lượng tử...",
-            "⚠️ CẢNH BÁO: Phát hiện hoạt động não bộ mạnh!",
-            "🚨 Đang truy cập suy nghĩ sâu...",
-            "💡 Giải mã thành công 97.3%...",
-            "🎯 Hoàn tất quá trình đọc não!"
-        ];
+          Object.keys(ageGroups).forEach((age, index) => {
+              const subCard = document.createElement('div');
+              subCard.className = 'sub-card card card-low'; // Thêm class để style riêng
+              const subHeader = document.createElement('div');
+              subHeader.className = 'card-header';
+              subHeader.innerHTML = `<h3>Độ Tuổi: ${age}</h3>`;
+              const subBody = document.createElement('div');
+              subBody.className = 'card-body';
+              const sortSelect = document.createElement('select');
+              sortSelect.className = 'sort-select form-select';
+              sortSelect.innerHTML = `
+                <option value="id">Sort by ID</option>
+                <option value="views25-desc">Sort by 25% Views Desc</option>
+                <option value="ratio3s-desc">Sort by 3s Ratio Desc</option>
+              `;
+              sortSelect.onchange = (e) => sortAndRenderChart3(index, e.target.value, age);
+              subBody.appendChild(sortSelect);
+              const chartContainer = document.createElement('div');
+              chartContainer.className = 'chart-container';
+              const canvas = document.createElement('canvas');
+              canvas.id = `chart3-sub-${index}`;
+              chartContainer.appendChild(canvas);
+              subBody.appendChild(chartContainer);
+              subCard.appendChild(subHeader);
+              subCard.appendChild(subBody);
+              body.appendChild(subCard);
 
-        function startScanning() {
-            const thought = document.getElementById('thoughtInput').value;
-            if (!thought.trim()) {
-                alert('Hãy nhập suy nghĩ của bạn trước!');
-                return;
+              sortAndRenderChart3(index, 'id', age);
+          });
+      }
+
+      function sortAndRenderChart3(index, sortType, age) {
+        let groupData = groupData3[age];
+        let sortedData = [...groupData];
+
+        if (sortType === 'views25-desc') {
+          sortedData.sort((a, b) => parseFloat(b['Lượt phát 25% thời lượng video']) - parseFloat(a['Lượt phát 25% thời lượng video']));
+        } else if (sortType === 'ratio3s-desc') {
+          sortedData.sort((a, b) => parseFloat(b['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) - parseFloat(a['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']));
+        } // 'id' is default, no sort or sort by ID if needed
+
+        const labels = sortedData.map(row => row['ID chiến dịch']);
+        const views25Data = sortedData.map(row => parseFloat(row['Lượt phát 25% thời lượng video']) || 0);
+        const ratio3sData = sortedData.map(row => parseFloat(row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']) || 0);
+
+        const canvas = document.getElementById(`chart3-sub-${index}`);
+        const minWidthPerLabel = 100;
+        const chartWidth = labels.length * minWidthPerLabel + 100;
+        canvas.width = chartWidth;
+        canvas.height = 500;
+        canvas.style.width = chartWidth + 'px';
+        canvas.style.height = '500px';
+
+        const ctx = canvas.getContext('2d');
+        if (subCharts3[index]) subCharts3[index].destroy();
+        subCharts3[index] = createChart(ctx, labels, views25Data, ratio3sData, false);
+
+        // Add click event for copying labels
+        canvas.addEventListener('click', function(event) {
+          const chartArea = subCharts3[index].chartArea;
+          const rect = canvas.getBoundingClientRect();
+          const clickX = event.clientX - rect.left;
+          const clickY = event.clientY - rect.top;
+          if (clickY > chartArea.bottom) {
+            const xScale = subCharts3[index].scales.x;
+            const ticks = xScale.ticks;
+            for (let i = 0; i < ticks.length; i++) {
+              let left = xScale.getPixelForTick(i - 0.5);
+              let right = xScale.getPixelForTick(i + 0.5);
+              if (isNaN(left)) left = xScale.left;
+              if (isNaN(right)) right = xScale.right;
+              if (clickX >= left && clickX <= right) {
+                const label = ticks[i].label;
+                navigator.clipboard.writeText(label).then(() => {
+                  alert('Đã copy ID chiến dịch: ' + label);
+                });
+                break;
+              }
             }
-
-            document.getElementById('scanningOverlay').style.display = 'flex';
-            
-            let textIndex = 0;
-            const textInterval = setInterval(() => {
-                document.getElementById('scanningText').textContent = scanningTexts[textIndex];
-                textIndex++;
-                if (textIndex >= scanningTexts.length) {
-                    clearInterval(textInterval);
-                }
-            }, 1200); // Tăng từ 700ms lên 1200ms
-
-            // Add glitch effect multiple times
-            setTimeout(() => {
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 500);
-            }, 3000);
-
-            setTimeout(() => {
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 800);
-            }, 8000);
-
-            setTimeout(() => {
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 300);
-            }, 12000);
-
-            // Tăng thời gian tổng từ 6000ms lên 16000ms (16 giây)
-            setTimeout(() => {
-                document.getElementById('scanningOverlay').style.display = 'none';
-                showResult(thought);
-            }, 16000);
-        }
-
-        function showResult(thought) {
-            const resultSection = document.getElementById('resultSection');
-            const resultText = document.getElementById('resultText');
-            
-            resultText.innerHTML = `
-                <div style="font-size: 2rem; margin-bottom: 20px;">💡</div>
-                <div>"${thought}"</div>
-                <br>
-                <div style="font-size: 1rem; color: #ff8800;">
-                    🤖 Độ chính xác: 99.9% | Thời gian quét: 0.003ms
-                </div>
-            `;
-            
-            resultSection.style.display = 'block';
-            
-            // Scroll to result
-            resultSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Initialize
-        window.addEventListener('load', () => {
-            initThreeJS();
+          }
         });
+      }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+      function renderChart4(data) {
+          // Group by Độ tuổi
+          const ageGroups = {};
+          data.forEach(row => {
+              const age = row['Độ tuổi'] || 'Unknown';
+              const reach = parseFloat(row['Người tiếp cận']) || 0;
+              const impressions = parseFloat(row['Lượt hiển thị']) || 0;
+              const frequency = parseFloat(row['Tần suất']) || 0;
 
-        // Enter key support
-        document.getElementById('thoughtInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                startScanning();
-            }
-        });
+              if (!ageGroups[age]) {
+                  ageGroups[age] = { reach: 0, impressions: 0, frequencies: [] };
+              }
+              ageGroups[age].reach += reach;
+              ageGroups[age].impressions += impressions;
+              if (frequency > 0) ageGroups[age].frequencies.push(frequency);
+          });
+
+          const labels = Object.keys(ageGroups);
+          const reaches = labels.map(age => ageGroups[age].reach);
+          const impressions = labels.map(age => ageGroups[age].impressions);
+          const avgFrequencies = labels.map(age => {
+              const freqs = ageGroups[age].frequencies;
+              return freqs.length > 0 ? (freqs.reduce((a, b) => a + b, 0) / freqs.length).toFixed(2) : 0;
+          });
+
+          const ctx = document.getElementById('chart4').getContext('2d');
+          if (chart4) chart4.destroy();
+          chart4 = new Chart(ctx, {
+              type: 'line',
+              data: {
+                  labels: labels,
+                  datasets: [
+                      { label: 'Người Tiếp Cận', data: reaches, borderColor: 'rgba(75, 192, 192, 1)', fill: false, tension: 0.1 },
+                      { label: 'Lượt Hiển Thị', data: impressions, borderColor: 'rgba(153, 102, 255, 1)', fill: false, tension: 0.1 },
+                      { label: 'Tần Suất Trung Bình', data: avgFrequencies, borderColor: 'rgba(255, 159, 64, 1)', fill: false, tension: 0.1 }
+                  ]
+              },
+              options: {
+                scales: { y: { beginAtZero: true } },
+                plugins: {
+                  legend: { position: 'top' },
+                },
+                responsive: true,
+                maintainAspectRatio: false
+              }
+          });
+      }
+
+      async function performAIAnalysis(data, token, currency, aiDiv) {
+          aiDiv.innerHTML = 'Đang phân tích AI...';
+
+          // Summarize data into a markdown table
+          let table = '| ID Chiến Dịch | Độ Tuổi | Người Tiếp Cận | Lượt Hiển Thị | Tần Suất | Người Nhắn Tin Mới | Chi Phí / Kết Quả | Số Tiền Chi Tiêu (' + currency + ') | Lượt Phát 25% | Tỷ Lệ 3 Giây | CTR (%) | CPC (' + currency + ') |\n';
+          table += '|--------------|---------|----------------|---------------|----------|---------------------|-------------------|-----------------------------|---------------|-------------|---------|----------------|\n';
+          data.forEach(row => {
+              table += `| ${row['ID chiến dịch']} | ${row['Độ tuổi']} | ${row['Người tiếp cận']} | ${row['Lượt hiển thị']} | ${row['Tần suất']} | ${row['Người liên hệ nhắn tin mới']} | ${row['Chi phí trên mỗi kết quả']} | ${row['Số tiền đã chi tiêu (VND)']} | ${row['Lượt phát 25% thời lượng video']} | ${row['Tỷ lệ lượt phát video trong tối thiểu 3 giây/lượt hiển thị']} | ${row['CTR (Tất cả)']} | ${row['CPC (Tất cả)']} |\n`;
+          });
+
+          const prompt = `Dựa trên dữ liệu hiệu suất quảng cáo Facebook sau đây, hãy đánh giá các chiến dịch đang hoạt động hiệu quả, các chiến dịch nên tắt và đề xuất chiến lược target độ tuổi và phân bổ ngân sách hợp lý nhất\n\n${table}`;
+
+          try {
+              const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                      model: 'gpt-4o-mini',
+                      messages: [{ role: 'user', content: prompt }]
+                  })
+              });
+
+              if (!response.ok) {
+                  throw new Error('Lỗi gọi API OpenAI');
+              }
+
+              const result = await response.json();
+              aiDiv.innerHTML = result.choices[0].message.content.replace(/\n/g, '<br>');
+          } catch (error) {
+              aiDiv.innerHTML = 'Lỗi: ' + error.message + '. Vui lòng kiểm tra token OpenAI.';
+          }
+      }
     </script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>
