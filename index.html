@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro AI - Đọc Suy Nghĩ Bằng AI Lượng Tử</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Tool Đăng Bài Dịch Vụ</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
@@ -15,533 +12,266 @@
         }
 
         body {
-            font-family: 'Orbitron', monospace;
-            background: #000;
-            color: #00ff00;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        .main-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            position: relative;
-            z-index: 1;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #ff0000, #00ff00, #0080ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #ff4444;
-            text-shadow: 0 0 10px #ff4444;
-            animation: pulse 1.5s infinite;
-        }
-
-        .input-section {
-            background: rgba(0, 20, 40, 0.9);
-            border: 2px solid #00ff00;
-            border-radius: 15px;
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.3);
-            backdrop-filter: blur(10px);
-            animation: borderGlow 3s ease-in-out infinite;
+            width: 100%;
+            max-width: 600px;
         }
 
-        .input-label {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
             text-align: center;
-            color: #00ccff;
-            text-shadow: 0 0 10px #00ccff;
+            font-size: 28px;
         }
 
-        .thought-input {
-                 width: 100%;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            color: #00ff00;
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            padding: 15px;
-            text-align: center;
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-            transition: all 0.3s ease;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .thought-input:focus {
-            border-color: #ff0080;
-            box-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
-            color: #ff0080;
+        textarea {
+            resize: vertical;
+            min-height: 120px;
         }
 
-        .scan-button {
-            width: 100%;
-            margin-top: 30px;
-            padding: 15px 40px;
-            background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00);
-            border: none;
-            border-radius: 25px;
-            color: #000;
-            font-family: 'Orbitron', monospace;
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 30px rgba(255, 128, 0, 0.6);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .scan-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 50px rgba(255, 128, 0, 0.8);
-        }
-
-        .scan-button::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transform: rotate(45deg);
-            transition: all 0.6s;
-            opacity: 0;
-        }
-
-        .scan-button:hover::before {
-            animation: shine 0.6s ease-in-out;
-        }
-
-        .scanning-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .scanning-content {
-            text-align: center;
-            animation: scanPulse 2s ease-in-out infinite;
-        }
-
-        .scanning-title {
-            font-size: 2.5rem;
-            color: #ff0000;
-            text-shadow: 0 0 20px #ff0000;
-            margin-bottom: 30px;
-            animation: dangerGlow 1s ease-in-out infinite alternate;
-        }
-
-        .scanning-gif {
-            width: 300px;
-            height: 300px;
-            border: 3px solid #00ff00;
-            border-radius: 50%;
-            background: radial-gradient(circle, #001100, #003300);
+        .button-group {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 30px auto;
-            animation: rotate 2s linear infinite;
-            position: relative;
-            overflow: hidden;
+            gap: 12px;
+            margin-top: 30px;
         }
 
-        .radar-sweep {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 255, 0, 0.8) 30deg, transparent 60deg);
-            animation: radarSweep 2s linear infinite;
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .scanning-text {
-            font-size: 1.5rem;
-            color: #ffff00;
-            text-shadow: 0 0 10px #ffff00;
-            margin: 20px 0;
-            animation: typing 3s steps(30) infinite;
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 30px 0;
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
-            width: 0%;
-            animation: fillProgress 15s ease-in-out forwards;
+        .btn-submit:active {
+            transform: translateY(0);
         }
 
-        .result-section {
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .loading {
             display: none;
             text-align: center;
-            background: rgba(20, 0, 0, 0.9);
-            border: 3px solid #ff0000;
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 50px;
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
-            animation: resultAppear 1s ease-out;
+            color: #667eea;
         }
 
-        .result-title {
-            font-size: 2rem;
-            color: #ff0000;
-            text-shadow: 0 0 20px #ff0000;
-            margin-bottom: 30px;
+        .loading.show {
+            display: block;
         }
 
-        .result-text {
-            font-size: 1.5rem;
-            color: #00ff00;
-            text-shadow: 0 0 15px #00ff00;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #00ff00;
-            animation: textGlow 2s ease-in-out infinite alternate;
+        .spinner {
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
         }
 
-        .warning-text {
-            font-size: 1rem;
-            color: #ff8800;
-            margin-top: 20px;
-            animation: warning 1s ease-in-out infinite;
-        }
-
-        .matrix-rain {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes glow {
-            0% { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; }
-            100% { text-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00, 0 0 80px #00ff00; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        @keyframes borderGlow {
-            0%, 100% { border-color: #00ff00; box-shadow: 0 0 50px rgba(0, 255, 0, 0.3); }
-            50% { border-color: #00ccff; box-shadow: 0 0 50px rgba(0, 204, 255, 0.3); }
-        }
-
-        @keyframes shine {
-            0% { left: -50%; opacity: 0; }
-            50% { opacity: 1; }
-            100% { left: 150%; opacity: 0; }
-        }
-
-        @keyframes rotate {
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        @keyframes radarSweep {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes scanPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        @keyframes dangerGlow {
-            0% { color: #ff0000; text-shadow: 0 0 20px #ff0000; }
-            100% { color: #ff4444; text-shadow: 0 0 40px #ff0000, 0 0 60px #ff0000; }
-        }
-
-        @keyframes typing {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes fillProgress {
-            0% { width: 0%; }
-            10% { width: 15%; }
-            25% { width: 35%; }
-            40% { width: 50%; }
-            55% { width: 65%; }
-            70% { width: 78%; }
-            85% { width: 92%; }
-            95% { width: 98%; }
-            100% { width: 100%; }
-        }
-
-        @keyframes resultAppear {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes textGlow {
-            0% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.3); }
-            100% { box-shadow: 0 0 40px rgba(0, 255, 0, 0.6); }
-        }
-
-        @keyframes warning {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .glitch {
-            animation: glitch 0.3s infinite;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
         }
     </style>
 </head>
 <body>
-    <div id="canvas-container"></div>
-    
-    <div class="main-container">
-        <div class="header">
-            <h1>🧠 ĐỌC VỊ QUỲNH CÔNG TÚA 🧠</h1>
-            <p class="subtitle">⚠️ CÔNG NGHỆ ĐỌC SUY NGHĨ NGUY HIỂM ⚠️</p>
+    <div class="container">
+        <h1>📝 Tool Đăng Bài</h1>
+        
+        <div id="message" class="message"></div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Đang gửi dữ liệu...</p>
         </div>
 
-        <div class="input-section">
-            <div class="input-label">💭 NHẬP SUY NGHĨ CỦA QUỲNH:</div>
-            <input type="text" class="thought-input" id="thoughtInput" placeholder="Hãy nghĩ về điều gì đó...">
-            <br>
-            <button class="scan-button" onclick="startScanning()">
-                🔬 QUÉT NÃO NGAY
-            </button>
-        </div>
-
-        <div class="result-section" id="resultSection">
-            <div class="result-title">🎯 KẾT QUẢ QUÉT NÃO:</div>
-            <div class="result-text" id="resultText"></div>
-            <div class="warning-text">⚠️ Dữ liệu đã được lưu vào hệ thống AI Lượng Tử ⚠️</div>
-        </div>
-    </div>
-
-    <div class="scanning-overlay" id="scanningOverlay">
-        <div class="scanning-content">
-            <div class="scanning-title glitch">🚨 ĐANG QUÉT NÃO... 🚨</div>
-            <div class="scanning-gif">
-                <div class="radar-sweep"></div>
-                <div style="font-size: 4rem;">🧠</div>
+        <form id="postForm">
+            <div class="form-group">
+                <label for="service">🏥 Chọn Dịch Vụ</label>
+                <select id="service" name="service" required>
+                    <option value="">-- Vui lòng chọn dịch vụ --</option>
+                    <option value="Hôi nách">Hôi nách</option>
+                    <option value="Giảm béo">Giảm béo</option>
+                    <option value="Nám">Nám</option>
+                    <option value="Mày">Mày</option>
+                    <option value="Môi">Môi</option>
+                </select>
             </div>
-            <div class="scanning-text" id="scanningText">Đang kết nối với AI Lượng Tử...</div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
+
+            <div class="form-group">
+                <label for="content">✍️ Nội Dung Bài Viết</label>
+                <textarea id="content" name="content" placeholder="Nhập nội dung bài viết của bạn..." required></textarea>
             </div>
-        </div>
+
+            <div class="form-group">
+                <label for="media">🖼️ URL Ảnh</label>
+                <input type="text" id="media" name="media" placeholder="Nhập link URL ảnh (vd: https://example.com/image.jpg)" required>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-submit">📤 Đăng Bài</button>
+                <button type="reset" class="btn-reset">🔄 Xóa</button>
+            </div>
+        </form>
     </div>
 
     <script>
-        // Three.js Background
-        let scene, camera, renderer, particles;
-        
-        function initThreeJS() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
+        const form = document.getElementById('postForm');
+        const messageDiv = document.getElementById('message');
+        const loadingDiv = document.getElementById('loading');
 
-            // Create particle system
-            const geometry = new THREE.BufferGeometry();
-            const vertices = [];
-            const colors = [];
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-            for (let i = 0; i < 5000; i++) {
-                vertices.push(
-                    (Math.random() - 0.5) * 2000,
-                    (Math.random() - 0.5) * 2000,
-                    (Math.random() - 0.5) * 2000
-                );
-                
-                const color = new THREE.Color();
-                color.setHSL(Math.random() * 0.3 + 0.3, 1, 0.5);
-                colors.push(color.r, color.g, color.b);
-            }
+            const content = document.getElementById('content').value.trim();
+            const media = document.getElementById('media').value.trim();
+            const services = document.getElementById('service').value;
 
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-            const material = new THREE.PointsMaterial({
-                size: 3,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8
-            });
-
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-            camera.position.z = 1000;
-
-            animate();
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            particles.rotation.x += 0.001;
-            particles.rotation.y += 0.002;
-            renderer.render(scene, camera);
-        }
-
-        // Scanning process
-        const scanningTexts = [
-            "🔍 Đang kết nối với AI Lượng Tử...",
-            "⚡ Khởi động máy quét não...",
-            "🌐 Kết nối với server NASA...",
-            "🧬 Phân tích sóng não Alpha, Beta, Gamma...",
-            "💾 Tải dữ liệu vào điện toán đám mây...",
-            "🔬 Giải mã 1.2 tỷ tín hiệu thần kinh...",
-            "🧠 Quét vùng não tiền trán...",
-            "⚡ Phân tích hoạt động Hippocampus...",
-            "🌐 Đồng bộ với mạng AI toàn cầu...",
-            "🔥 Xử lý bằng siêu máy tính lượng tử...",
-            "⚠️ CẢNH BÁO: Phát hiện hoạt động não bộ mạnh!",
-            "🚨 Đang truy cập suy nghĩ sâu...",
-            "💡 Giải mã thành công 97.3%...",
-            "🎯 Hoàn tất quá trình đọc não!"
-        ];
-
-        function startScanning() {
-            const thought = document.getElementById('thoughtInput').value;
-            if (!thought.trim()) {
-                alert('Hãy nhập suy nghĩ của bạn trước!');
+            if (!content || !media || !services) {
+                showMessage('Vui lòng điền đầy đủ tất cả các trường', 'error');
                 return;
             }
 
-            document.getElementById('scanningOverlay').style.display = 'flex';
-            
-            let textIndex = 0;
-            const textInterval = setInterval(() => {
-                document.getElementById('scanningText').textContent = scanningTexts[textIndex];
-                textIndex++;
-                if (textIndex >= scanningTexts.length) {
-                    clearInterval(textInterval);
+            // Kiểm tra URL hợp lệ
+            if (!isValidUrl(media)) {
+                showMessage('URL ảnh không hợp lệ', 'error');
+                return;
+            }
+
+            const payload = {
+                content: content,
+                media: media,
+                services: services
+            };
+
+            loadingDiv.classList.add('show');
+            messageDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('https://dhsyccqor.datadex.vn/webhook/auto-update-post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    showMessage('✅ Đăng bài thành công!', 'success');
+                    form.reset();
+                } else {
+                    showMessage(`❌ Lỗi: ${response.status} ${response.statusText}`, 'error');
                 }
-            }, 1200); // Tăng từ 700ms lên 1200ms
-
-            // Add glitch effect multiple times
-            setTimeout(() => {
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 500);
-            }, 3000);
-
-            setTimeout(() => {
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 800);
-            }, 8000);
-
-            setTimeout(() => {
-                document.body.classList.add('glitch');
-                setTimeout(() => document.body.classList.remove('glitch'), 300);
-            }, 12000);
-
-            // Tăng thời gian tổng từ 6000ms lên 16000ms (16 giây)
-            setTimeout(() => {
-                document.getElementById('scanningOverlay').style.display = 'none';
-                showResult(thought);
-            }, 16000);
-        }
-
-        function showResult(thought) {
-            const resultSection = document.getElementById('resultSection');
-            const resultText = document.getElementById('resultText');
-            
-            resultText.innerHTML = `
-                <div style="font-size: 2rem; margin-bottom: 20px;">💡</div>
-                <div>"${thought}"</div>
-                <br>
-                <div style="font-size: 1rem; color: #ff8800;">
-                    🤖 Độ chính xác: 99.9% | Thời gian quét: 0.003ms
-                </div>
-            `;
-            
-            resultSection.style.display = 'block';
-            
-            // Scroll to result
-            resultSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Initialize
-        window.addEventListener('load', () => {
-            initThreeJS();
-        });
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Enter key support
-        document.getElementById('thoughtInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                startScanning();
+            } catch (error) {
+                showMessage(`❌ Lỗi: ${error.message}`, 'error');
+            } finally {
+                loadingDiv.classList.remove('show');
             }
         });
+
+        function showMessage(message, type) {
+            messageDiv.textContent = message;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 4000);
+            }
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
     </script>
 </body>
 </html>
